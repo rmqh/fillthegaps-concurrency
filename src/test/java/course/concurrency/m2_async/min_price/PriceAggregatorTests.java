@@ -43,10 +43,10 @@ public class PriceAggregatorTests {
     public void shouldReturnMin() {
         int shopCount = 50;
         PriceRetriever priceRetriever = mock(PriceRetriever.class);
-        List<Double> prices = IntStream.range(0, shopCount-1).boxed()
+        List<Double> prices = IntStream.range(0, shopCount - 1).boxed()
                 .map(i -> ThreadLocalRandom.current().nextDouble())
                 .collect(toList());
-        when(priceRetriever.getPrice(anyLong(), anyLong())).thenReturn(ThreadLocalRandom.current().nextDouble()*100,
+        when(priceRetriever.getPrice(anyLong(), anyLong())).thenReturn(ThreadLocalRandom.current().nextDouble() * 100,
                 prices.toArray(new Double[]{}));
         priceAggregator.setPriceRetriever(priceRetriever);
         Set<Long> shops = LongStream.range(0, shopCount).boxed().collect(toSet());
@@ -82,12 +82,12 @@ public class PriceAggregatorTests {
 
     @Test
     @DisplayName("Half of shops respond too long")
-    public void shouldTolerateLongResponses(){
+    public void shouldTolerateLongResponses() {
         int shopCount = 50;
-        int half = shopCount/2;
+        int half = shopCount / 2;
         PriceRetriever priceRetriever = mock(PriceRetriever.class);
         List<Double> prices = IntStream.range(0, half).boxed()
-                .map(i -> ThreadLocalRandom.current().nextDouble()*100).collect(toList());
+                .map(i -> ThreadLocalRandom.current().nextDouble() * 100).collect(toList());
 
         AtomicInteger totalRequestCount = new AtomicInteger();
         AtomicInteger succeedRequestCount = new AtomicInteger();
@@ -122,7 +122,7 @@ public class PriceAggregatorTests {
         AtomicBoolean isComplete = new AtomicBoolean(false);
         List<Double> prices = IntStream.range(0, shopCount).boxed()
                 .map(i -> {
-                    Double price = isComplete.get() ? ThreadLocalRandom.current().nextDouble()*100 : null;
+                    Double price = isComplete.get() ? ThreadLocalRandom.current().nextDouble() * 100 : null;
                     isComplete.set(!isComplete.get());
                     return price;
                 }).collect(toList());
@@ -163,7 +163,7 @@ public class PriceAggregatorTests {
                 .map(i -> {
                     boolean isComplete = ThreadLocalRandom.current().nextBoolean();
                     if (isComplete) {
-                        double price = ThreadLocalRandom.current().nextDouble()*100;
+                        double price = ThreadLocalRandom.current().nextDouble() * 100;
                         return price;
                     } else return null;
                 }).collect(toList());
@@ -197,11 +197,11 @@ public class PriceAggregatorTests {
         int shopCount = 50;
         double expectedMinPrice = 10d;
 
-        List<Long> shopIds = LongStream.range(0, shopCount-1).boxed().collect(toList());
+        List<Long> shopIds = LongStream.range(0, shopCount - 1).boxed().collect(toList());
         priceAggregator.setShops(shopIds);
 
-        List<Double> prices = shopIds.stream().map(id -> 300+Double.valueOf(id)).collect(toList());
-        prices.add(shopCount-1, expectedMinPrice);
+        List<Double> prices = shopIds.stream().map(id -> 300 + Double.valueOf(id)).collect(toList());
+        prices.add(shopCount - 1, expectedMinPrice);
 
         PriceRetriever priceRetriever = mock(PriceRetriever.class);
         AtomicInteger invocationCount = new AtomicInteger();
