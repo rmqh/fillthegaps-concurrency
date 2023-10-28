@@ -7,7 +7,7 @@ public class AuctionPessimistic implements Auction {
 
     public AuctionPessimistic(Notifier notifier) {
         this.notifier = notifier;
-        this.latestBid = new Bid(1L, 1L, 1L);
+        this.latestBid = new Bid(0L, 0L, 0L);
     }
 
     public synchronized boolean propose(Bid bid) {
