@@ -1,11 +1,23 @@
 package course.concurrency.exams.auction;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.platform.suite.api.IncludeTags;
 import org.junit.platform.suite.api.SelectPackages;
 import org.junit.platform.suite.api.Suite;
 
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.LongStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,12 +27,14 @@ public class AuctionTests {
     @Suite
     @IncludeTags("pessimistic")
     @SelectPackages("course.concurrency.exams.auction")
-    public static class PessimisticSuite {}
+    public static class PessimisticSuite {
+    }
 
     @Suite
     @IncludeTags("optimistic")
     @SelectPackages("course.concurrency.exams.auction")
-    public static class OptimisticSuite {}
+    public static class OptimisticSuite {
+    }
 
     private static final int TEST_COUNT = 10;
     private static final ExecutionStatistics stat = new ExecutionStatistics();
@@ -95,7 +109,8 @@ public class AuctionTests {
             executor.submit(() -> {
                 try {
                     latch.await();
-                } catch (InterruptedException ignored) {}
+                } catch (InterruptedException ignored) {
+                }
 
                 for (int it = 0; it < iterations; it++) {
                     Bid bid = bidQueue.poll();
@@ -121,7 +136,7 @@ public class AuctionTests {
         ExecutorService executor = Executors.newFixedThreadPool(2);
 
         BlockingQueue<Bid> incBidQueue = new LinkedBlockingQueue<>();
-        LongStream.range(0, iterations*2).boxed().forEach(i -> incBidQueue.offer(new Bid(i, i, i)));
+        LongStream.range(0, iterations * 2).boxed().forEach(i -> incBidQueue.offer(new Bid(i, i, i)));
 
         for (int i = 0; i < iterations; i++) {
             CountDownLatch startAuctionTasksLatch = new CountDownLatch(1);
@@ -132,14 +147,16 @@ public class AuctionTests {
             executor.submit(() -> {
                 try {
                     startAuctionTasksLatch.await();
-                } catch (InterruptedException ignored) {}
+                } catch (InterruptedException ignored) {
+                }
                 auction.propose(bid1);
                 auctionTasksDoneLatch.countDown();
             });
             executor.submit(() -> {
                 try {
                     startAuctionTasksLatch.await();
-                } catch (InterruptedException ignored) {}
+                } catch (InterruptedException ignored) {
+                }
                 auction.propose(bid2);
                 auctionTasksDoneLatch.countDown();
             });

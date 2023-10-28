@@ -3,14 +3,14 @@ package course.concurrency.exams.auction;
 public class AuctionPessimistic implements Auction {
 
     private Notifier notifier;
+    private Bid latestBid;
 
     public AuctionPessimistic(Notifier notifier) {
         this.notifier = notifier;
+        this.latestBid = new Bid(1L, 1L, 1L);
     }
 
-    private Bid latestBid;
-
-    public boolean propose(Bid bid) {
+    public synchronized boolean propose(Bid bid) {
         if (bid.getPrice() > latestBid.getPrice()) {
             notifier.sendOutdatedMessage(latestBid);
             latestBid = bid;
@@ -19,7 +19,7 @@ public class AuctionPessimistic implements Auction {
         return false;
     }
 
-    public Bid getLatestBid() {
+    public synchronized Bid getLatestBid() {
         return latestBid;
     }
 }
