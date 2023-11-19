@@ -4,7 +4,7 @@ public class AuctionStoppablePessimistic implements AuctionStoppable {
 
     private final Notifier notifier;
     private Bid latestBid;
-    private boolean isStopped;
+    private boolean stopped;
 
     public AuctionStoppablePessimistic(Notifier notifier) {
         this.notifier = notifier;
@@ -12,11 +12,11 @@ public class AuctionStoppablePessimistic implements AuctionStoppable {
     }
 
     public boolean propose(Bid bid) {
-        if (isStopped){
+        if (stopped){
             return false;
         }
         synchronized (this) {
-            if (latestBid.getPrice() >= bid.getPrice()) {
+            if (latestBid.getPrice() >= bid.getPrice() || stopped) {
                 return false;
             }
             latestBid = bid;
@@ -30,7 +30,7 @@ public class AuctionStoppablePessimistic implements AuctionStoppable {
     }
 
     public synchronized Bid stopAuction() {
-        this.isStopped = true;
+        this.stopped = true;
         return latestBid;
     }
 }
