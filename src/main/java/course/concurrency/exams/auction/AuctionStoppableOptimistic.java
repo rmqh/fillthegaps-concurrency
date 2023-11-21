@@ -1,43 +1,38 @@
 package course.concurrency.exams.auction;
 
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.atomic.AtomicStampedReference;
+import java.util.concurrent.atomic.AtomicMarkableReference;
 
 public class AuctionStoppableOptimistic implements AuctionStoppable {
 
     private final Notifier notifier;
-    private final AtomicReference<Bid> atomRefBid;
-    private final AtomicStampedReference<Boolean> atomStampRefBoolean;
+    private final AtomicMarkableReference<Bid> atomMarkRefBid;
 
     public AuctionStoppableOptimistic(Notifier notifier) {
         this.notifier = notifier;
-        this.atomRefBid = new AtomicReference<>(new Bid(0L, 0L, 0L));
-        this.atomStampRefBoolean = new AtomicStampedReference<>(false, 0);
+        this.atomMarkRefBid = new AtomicMarkableReference<>(new Bid(0L, 0L, 0L), false);
     }
 
     public boolean propose(Bid bid) {
         Bid bidLatest;
         do {
-            bidLatest = atomRefBid.get();
-            if (bidLatest.getPrice() >= bid.getPrice() || atomStampRefBoolean.getReference()) {
+            bidLatest = atomMarkRefBid.getReference();
+            if (bidLatest.getPrice() >= bid.getPrice() || atomMarkRefBid.isMarked()) {
                 return false;
             }
-        } while (!atomRefBid.compareAndSet(bidLatest, bid));
-        notifier.sendOutdatedMessage(bidLatest);
+        } while (!atomMarkRefBid.compareAndSet(bidLatest, bid, false, false));
+        notifier.sendOutdatedMessage(bid);
         return true;
     }
 
     public Bid getLatestBid() {
-        return atomRefBid.get();
+        return atomMarkRefBid.getReference();
     }
 
     public Bid stopAuction() {
         boolean isStopped;
-        int stamp;
         do {
-            isStopped = atomStampRefBoolean.getReference();
-            stamp = atomStampRefBoolean.getStamp();
-        } while (!atomStampRefBoolean.compareAndSet(isStopped, true, stamp, ++stamp));
-        return atomRefBid.get();
+            isStopped = atomMarkRefBid.attemptMark(atomMarkRefBid.getReference(), true);
+        } while (!isStopped);
+        return atomMarkRefBid.getReference();
     }
 }
